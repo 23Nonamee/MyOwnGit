@@ -64,12 +64,28 @@ int cmd_hash_object(const char *filename, int flag) {
     
     char obj_hex[128];
     snprintf(obj_hex, sizeof(obj_hex), "%s/%s", directory_hex, hex_hash + 2);
-    printf("The blob file path is: %s\n", obj_hex); 
+    printf("The blob file path is: %s\n", obj_hex);
+    
+    uLong compression_len = compressBound(total_len); // calculate the max size of compression to reserve memory
+    Bytef *compressed_data = (Bytef *)malloc(compression_len);// reserve space in memory for the compressed file
+  
+    compress(compressed_data, &compression_len, (const Bytef *)full_data, total_len); // bytes compression of the file
+    FILE *obj_file = fopen(obj_hex, "wb");
+
+    if (obj_file == NULL){
+      perror("ERROR: The file don't exist!\n");
+    }
+    fwrite(compressed_data, 1, compression_len, obj_file);
+    free(compressed_data);
+    fclose(obj_file);
   }
+
+
   //free the memory
   free(full_data);
   fclose(f);
   free(content);
+
   
   return 0;
 

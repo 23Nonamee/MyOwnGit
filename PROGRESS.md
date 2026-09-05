@@ -47,10 +47,10 @@
 ## 📋 Lista de Tareas Pendientes (Roadmap de Objetivos)
 
 ### Fase 1: Completar Objetos y Blobs
-- [ ] **Escribir objetos en disco (`hash-object -w <archivo>`):**
-  - Comprimir `header + content` con `deflate` (usando `zlib`).
-  - Extraer los primeros 2 caracteres del hash para la subcarpeta `.mygit/objects/xx/`.
-  - Crear la subcarpeta si no existe y escribir los 38 caracteres restantes como nombre de archivo.
+- [x] **Escribir objetos en disco (`hash-object -w <archivo>`):**
+  - [x] Comprimir `header + content` con `deflate` (usando `zlib`).
+  - [x] Extraer los primeros 2 caracteres del hash para la subcarpeta `.mygit/objects/xx/`.
+  - [x] Crear la subcarpeta si no existe y escribir los 38 caracteres restantes como nombre de archivo.
 - [ ] **Leer objetos (`cat-file -p <hash>`):**
   - Localizar el archivo en `.mygit/objects/xx/yyyy...`.
   - Descomprimir con `inflate` (`zlib`).
