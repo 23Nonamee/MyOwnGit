@@ -1,3 +1,9 @@
+//files
+#include "../builtin.h"
+#include "../libraries.h"
+#include "../wrapper.h"
+
+//libraries
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -6,19 +12,10 @@
 #include <sys/stat.h>
 #include <sys/types.h>
 
-//Funtion to detect the OS
-
-int create_dir(const char *path) {
-  #ifdef _WIN32
-    return mkdir(path);
-  #else 
-    return mkdir(path, 0755);
-  #endif /* ifdef _WIN32 */
-}
 
 
 // Read bytes and create hash 
-int cmd_hash_object(const char *filename, int flag) {
+int hash_object(const char *filename, int flag) {
   
   FILE *f = fopen(filename,"rb"); //open the file in memory
   if (f == NULL) {
@@ -70,13 +67,15 @@ int cmd_hash_object(const char *filename, int flag) {
     Bytef *compressed_data = (Bytef *)malloc(compression_len);// reserve space in memory for the compressed file
   
     compress(compressed_data, &compression_len, (const Bytef *)full_data, total_len); // bytes compression of the file
-    FILE *obj_file = fopen(obj_hex, "wb");
+    FILE *obj_file = fopen(obj_hex, "wb"); //open a file in the path of (obj_hex)
 
-    if (obj_file == NULL){
+    if (obj_file == NULL){ // check if the file in NULL and give an error
       perror("ERROR: The file don't exist!\n");
     }
-    fwrite(compressed_data, 1, compression_len, obj_file);
-    free(compressed_data);
+    fwrite(compressed_data, 1, compression_len, obj_file); // write the (compressed_data) in (obj_file)
+      
+    //free memory
+    free(compressed_data); 
     fclose(obj_file);
   }
 
@@ -90,79 +89,3 @@ int cmd_hash_object(const char *filename, int flag) {
   return 0;
 
 } 
-
-int cmd_init(void) {
-
-  if (create_dir(".mygit") != 0) { // Create the directory .mygit
-    perror("Error creating .mygit");
-    return 1;
-  }
-
-  if (create_dir(".mygit/objects") != 0){
-    perror("Error creating .mygit/objects");
-    return 1;
-  }
-
-  if (create_dir(".mygit/refs") != 0){
-    perror("Error creating .mygit/refs");
-    return 1;
-  }
-
-  if (create_dir(".mygit/refs/heads") != 0){
-    perror("Error creating .mygit/refs/heads");
-    return 1;
-  }
-
-  FILE *head_file = fopen(".mygit/HEAD", "w"); // create the file HEAD
-  if (head_file == NULL) {
-    perror("Error creating .mygit/HEAD");
-    return 1;
-  }
-  fprintf(head_file, "ref: refs/heads/main\n"); //add a line in HEAD pointing the default branch
-  fclose(head_file);
-  
-  printf("Initialized empty MyGit repository in .mygit/\n");
-  return 0;
-}
-
-// Main function
-int main(int argc, char *argv[]) {
-  
-  if (argc < 2){ // Checking if the user use an argument 
-    printf("Bad Command Usage!, You need to write: ./mygit <command>\n");
-    return EXIT_FAILURE;
-  }
-
-  if (strcmp(argv[1], "init") == 0) { //Checking if the command is init
-      cmd_init();
-
-  }
-
-  else if (strcmp(argv[1], "hash-object") == 0) { //Checking if the command is hash-object
-    
-    
-    if (argc < 3 ) { //checking if the args are 3 
-      printf("Usage: ./mygit hash-object <filename>\n");
-      return EXIT_FAILURE;
-    }
-    
-    if(strcmp (argv[2], "-w") == 0){
-      
-      if (argc < 4 ) { //checking if the args are 3 
-      printf("Usage: ./mygit hash-object -w <filename>\n");
-      return EXIT_FAILURE;
-      }
-
-      cmd_hash_object(argv[3], 1);
-    }
-
-    else{
-    cmd_hash_object(argv[2], 0);
-    }
-  }
-
-  else{
-    printf("Unknow Command\n"); 
-  }
-  return EXIT_SUCCESS;
-}
